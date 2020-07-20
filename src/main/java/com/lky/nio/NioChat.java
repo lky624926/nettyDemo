@@ -40,6 +40,7 @@ public class NioChat {
                     if (selectionKey.isAcceptable()){
                         //连接事件
                         SocketChannel accept = listenChannel.accept();
+                        accept.configureBlocking(false);
                         //获取新的channel并注册为读事件
                         accept.register(selector, SelectionKey.OP_READ);
                     }else if (selectionKey.isReadable()){
@@ -61,7 +62,8 @@ public class NioChat {
             for (;;){
                 int read = channel.read(buffer);
                 if (read>0){
-                    String s = new String(buffer.array());
+                    byte[] array = buffer.array();
+                    String s = new String(array);
                     msg.append(s);
                     System.out.println("收到消息："+s);
                 }else {
@@ -82,10 +84,13 @@ public class NioChat {
         //所有注册过的channel
         for (SelectionKey selectionKey:keys){
             try {
-                SocketChannel channel1 = (SocketChannel)selectionKey.channel();
-                if (!channel.equals(channel1)){
-                    ByteBuffer wrap = ByteBuffer.wrap(msg.getBytes());
-                    channel1.write(wrap);
+                SelectableChannel channel1 = selectionKey.channel();
+                if (channel1 instanceof SocketChannel){
+                    SocketChannel socketChannel = (SocketChannel)channel1;
+                    if (!channel.equals(socketChannel)){
+                        ByteBuffer wrap = ByteBuffer.wrap(msg.getBytes());
+                        socketChannel.write(wrap);
+                    }
                 }
             } catch (IOException e) {
                 e.printStackTrace();
