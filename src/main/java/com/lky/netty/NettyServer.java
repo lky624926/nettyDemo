@@ -47,8 +47,6 @@ public class NettyServer {
             ServerBootstrap serverBootstrap = new ServerBootstrap();
             serverBootstrap.group(bossGroup,workGroup)
                     .channel(NioServerSocketChannel.class)
-                    .option(ChannelOption.SO_KEEPALIVE, true)
-                    .option(ChannelOption.TCP_NODELAY, true)
                     .option(ChannelOption.SO_BACKLOG, 1024)
                     .localAddress(port)
                     .childHandler(new ChannelInitializer<SocketChannel>() {
